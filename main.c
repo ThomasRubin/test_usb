@@ -35,7 +35,6 @@
 //--------------------------------------------------------------------+
 void led_blinking_task(void);
 
-extern void cdc_app_task(void);
 extern void hid_app_task(void);
 
 /*------------- MAIN -------------*/
@@ -54,7 +53,6 @@ int main(void)
     tuh_task();
 
     led_blinking_task();
-    cdc_app_task();
     hid_app_task();
   }
 

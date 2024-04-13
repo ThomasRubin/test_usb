@@ -23,6 +23,8 @@
  *
  */
 
+#include <stdint.h>
+#include <stdio.h>
 #include "bsp/board.h"
 #include "tusb.h"
 
@@ -51,6 +53,7 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
 
 void hid_app_task(void)
 {
+  //printf("Hello World");
   // nothing to do
 }
 
@@ -65,7 +68,9 @@ void hid_app_task(void)
 // therefore report_desc = NULL, desc_len = 0
 void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_report, uint16_t desc_len)
 {
-  printf("HID device address = %d, instance = %d is mounted\r\n", dev_addr, instance);
+  const uint8_t instance_count = tuh_hid_instance_count(dev_addr);
+
+  printf("HID device address = %d, instance = %d, number of instances = %d is mounted\r\n", dev_addr, instance, instance_count);
 
   // Interface protocol (hid_interface_protocol_enum_t)
   const char* protocol_str[] = { "None", "Keyboard", "Mouse" };
@@ -79,6 +84,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
   {
     hid_info[instance].report_count = tuh_hid_parse_report_descriptor(hid_info[instance].report_info, MAX_REPORT, desc_report, desc_len);
     printf("HID has %u reports \r\n", hid_info[instance].report_count);
+    printf("HID report has report_id = %d, usage = %d, usage_page = %d.", hid_info[instance].report_info->report_id, hid_info[instance].report_info->usage, hid_info[instance].report_info->usage_page);
   }
 
   // request to receive report
@@ -242,6 +248,7 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
   {
     // Simple report without report ID as 1st byte
     rpt_info = &rpt_info_arr[0];
+    
   }else
   {
     // Composite report, 1st byte is report ID, data starts from 2nd byte
