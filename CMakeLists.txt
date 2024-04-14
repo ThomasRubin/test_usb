@@ -42,3 +42,8 @@ add_custom_target(gdb_start
         COMMAND gdb-multiarch
         COMMENT "Start gbd session."
 )
+
+add_custom_target(minicom_start
+        COMMAND minicom -b 115200 -o -D /dev/ttyACM0
+        COMMENT "Starting minicom connection at /dev/ttyACM0 with 115200 baud."
+)

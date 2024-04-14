@@ -49,6 +49,7 @@ static struct
 
 static void process_kbd_report(hid_keyboard_report_t const *report);
 static void process_mouse_report(hid_mouse_report_t const * report);
+static void process_gamepad_report(hid_gamepad_report_t const * report);
 static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len);
 
 void hid_app_task(void)
@@ -70,21 +71,21 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
 {
   const uint8_t instance_count = tuh_hid_instance_count(dev_addr);
 
-  printf("HID device address = %d, instance = %d, number of instances = %d is mounted\r\n", dev_addr, instance, instance_count);
+  TU_LOG3("HID device address = %d, instance = %d, number of instances = %d is mounted\r\n", dev_addr, instance, instance_count);
 
   // Interface protocol (hid_interface_protocol_enum_t)
   const char* protocol_str[] = { "None", "Keyboard", "Mouse" };
   uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
 
-  printf("HID Interface Protocol = %s\r\n", protocol_str[itf_protocol]);
+  TU_LOG3("HID Interface Protocol = %s\r\n", protocol_str[itf_protocol]);
 
   // By default host stack will use activate boot protocol on supported interface.
   // Therefore for this simple example, we only need to parse generic report descriptor (with built-in parser)
   if ( itf_protocol == HID_ITF_PROTOCOL_NONE )
   {
     hid_info[instance].report_count = tuh_hid_parse_report_descriptor(hid_info[instance].report_info, MAX_REPORT, desc_report, desc_len);
-    printf("HID has %u reports \r\n", hid_info[instance].report_count);
-    printf("HID report has report_id = %d, usage = %d, usage_page = %d.", hid_info[instance].report_info->report_id, hid_info[instance].report_info->usage, hid_info[instance].report_info->usage_page);
+    TU_LOG3("HID has %u reports \r\n", hid_info[instance].report_count);
+    TU_LOG3("HID report has report_id = %d, usage = %d, usage_page = %d.\n", hid_info[instance].report_info->report_id, hid_info[instance].report_info->usage, hid_info[instance].report_info->usage_page);
   }
 
   // request to receive report
@@ -105,7 +106,6 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len)
 {
   uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
-
   switch (itf_protocol)
   {
     case HID_ITF_PROTOCOL_KEYBOARD:
@@ -234,6 +234,45 @@ static void process_mouse_report(hid_mouse_report_t const * report)
 }
 
 //--------------------------------------------------------------------+
+// Gamepad
+//--------------------------------------------------------------------+
+
+static inline void process_hat(const uint8_t hat)
+{
+  static uint8_t prev_hat = 0;
+  if(prev_hat == hat)
+    return;
+
+  
+
+  prev_hat = report->hat;
+}
+
+static inline void process_buttons(const uint32_t buttons)
+{
+  static uint32_t prev_buttons = 0;
+  if(prev_buttons = buttons)
+    return;
+
+  prev_buttons = report->buttons;
+}
+
+static void process_gamepad_report(hid_gamepad_report_t const * report) 
+{
+  TU_LOG3("\nProcess new gamepad Report.\n")
+  TU_LOG3("Delta x movement = %d\n", report->x);
+  TU_LOG3("Delta y movement = %d\n", report->y);
+  TU_LOG3("Delta z movement = %d\n", report->z);
+  TU_LOG3("Delta rx movement = %d\n", report->rx);
+  TU_LOG3("Delta ry movement = %d\n", report->ry);
+  TU_LOG3("Delta rz movement = %d\n", report->rz);
+
+  process_hat(report->hat);
+
+  process_buttons(report->buttons);
+}
+
+//--------------------------------------------------------------------+
 // Generic Report
 //--------------------------------------------------------------------+
 static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len)
@@ -248,7 +287,6 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
   {
     // Simple report without report ID as 1st byte
     rpt_info = &rpt_info_arr[0];
-    
   }else
   {
     // Composite report, 1st byte is report ID, data starts from 2nd byte
@@ -296,6 +334,12 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
         // Assume mouse follow boot report layout
         process_mouse_report( (hid_mouse_report_t const*) report );
       break;
+
+      case HID_USAGE_DESKTOP_GAMEPAD:
+        
+      break;
+
+
 
       default: break;
     }
