@@ -69,8 +69,14 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
 
 void hid_app_task(void)
 {
-  //printf("Hello World");
-  // nothing to do
+  const uint32_t interval_ms = 1000;
+  static uint32_t start_ms = 0;
+
+  // Blink every interval ms
+  if ( board_millis() - start_ms < interval_ms) return; // not enough time
+  start_ms += interval_ms;
+
+  tuh_hid_receive_report
 }
 
 //--------------------------------------------------------------------+
