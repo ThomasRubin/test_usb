@@ -28,6 +28,21 @@
 #include "bsp/board.h"
 #include "tusb.h"
 
+void printBits(size_t const size, void const * const ptr)
+{
+    unsigned char *b = (unsigned char*) ptr;
+    unsigned char byte;
+    int i, j;
+    
+    for (i = size-1; i >= 0; i--) {
+        for (j = 7; j >= 0; j--) {
+            byte = (b[i] >> j) & 1;
+            printf("%u", byte);
+        }
+    }
+    puts("");
+}
+
 //--------------------------------------------------------------------+
 // MACRO TYPEDEF CONSTANT ENUM DECLARATION
 //--------------------------------------------------------------------+
@@ -243,29 +258,31 @@ static inline void process_hat(const uint8_t hat)
   if(prev_hat == hat)
     return;
 
-  
+  printBits(sizeof(hat), &hat);
 
-  prev_hat = report->hat;
+  prev_hat = hat;
 }
 
 static inline void process_buttons(const uint32_t buttons)
 {
   static uint32_t prev_buttons = 0;
-  if(prev_buttons = buttons)
+  if(prev_buttons == buttons)
     return;
 
-  prev_buttons = report->buttons;
+  printBits(sizeof(buttons), &buttons);
+
+  prev_buttons = buttons;
 }
 
 static void process_gamepad_report(hid_gamepad_report_t const * report) 
 {
-  TU_LOG3("\nProcess new gamepad Report.\n")
-  TU_LOG3("Delta x movement = %d\n", report->x);
-  TU_LOG3("Delta y movement = %d\n", report->y);
-  TU_LOG3("Delta z movement = %d\n", report->z);
-  TU_LOG3("Delta rx movement = %d\n", report->rx);
-  TU_LOG3("Delta ry movement = %d\n", report->ry);
-  TU_LOG3("Delta rz movement = %d\n", report->rz);
+  printf("\nProcess new gamepad Report.\n");
+  printf("Delta x movement = %d\n", report->x);
+  printf("Delta y movement = %d\n", report->y);
+  printf("Delta z movement = %d\n", report->z);
+  printf("Delta rx movement = %d\n", report->rx);
+  printf("Delta ry movement = %d\n", report->ry);
+  printf("Delta rz movement = %d\n", report->rz);
 
   process_hat(report->hat);
 
@@ -336,7 +353,7 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
       break;
 
       case HID_USAGE_DESKTOP_GAMEPAD:
-        
+        process_gamepad_report(const int *report)
       break;
 
 

@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "bsp/board.h"
+#include "pico/time.h"
 #include "tusb.h"
 
 //--------------------------------------------------------------------+
@@ -54,6 +55,8 @@ int main(void)
 
     led_blinking_task();
     hid_app_task();
+
+    //sleep_ms(1000);
   }
 
   return 0;
