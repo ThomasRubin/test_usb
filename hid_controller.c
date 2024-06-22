@@ -71,12 +71,12 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance,
                                    uint8_t const *report, uint16_t len);
 
 bool is_mounted = false;
-uint8_t device_address = 0;
+uint8_t device_address = 1;
 uint8_t device_instance = 0;
 
 void hid_app_task(void)
 {
-    const uint32_t interval_ms = 4000;
+    const uint32_t interval_ms = 1000;
     static uint32_t start_ms = 0;
     // Blink every interval ms
     if(board_millis() - start_ms < interval_ms)
@@ -87,6 +87,7 @@ void hid_app_task(void)
     if(is_mounted)
     {
         TU_LOG3("TU_LOG3 Send new report request.\n");
+        printf("Request report from %d %d\n", device_address, device_instance);
         if(!tuh_hid_receive_report(device_address, device_instance))
         {
             printf("Error: cannot request to receive report\r\n");
@@ -156,6 +157,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
                                 uint8_t const *report, uint16_t len)
 {
+    printf("Received report from %d %d\n", dev_addr, instance);
     uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
     switch(itf_protocol)
     {
@@ -175,11 +177,10 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
             process_generic_report(dev_addr, instance, report, len);
             break;
     }
-
     // continue to request to receive report
-    // if ( !tuh_hid_receive_report(dev_addr, instance) )
+    // if(!tuh_hid_receive_report(dev_addr, instance))
     // {
-    //   printf("Error: cannot request to receive report\r\n");
+    //     printf("Error: cannot request to receive report\r\n");
     // }
 }
 
@@ -334,13 +335,17 @@ static inline void process_buttons(const uint32_t buttons)
 
 static void process_gamepad_report(hid_gamepad_report_t const *report)
 {
-    // printf("\nProcess new gamepad Report.\n");
-    // printf("Delta x movement = %d\n", report->x);
-    // printf("Delta y movement = %d\n", report->y);
-    // printf("Delta z movement = %d\n", report->z);
-    // printf("Delta rx movement = %d\n", report->rx);
-    // printf("Delta ry movement = %d\n", report->ry);
-    // printf("Delta rz movement = %d\n", report->rz);
+    printf("\nProcess new gamepad Report.\n");
+    printf("Delta x movement = %d\n", report->x);
+    printf("Delta y movement = %d\n", report->y);
+    printf("Delta z movement = %d\n", report->z);
+    printf("Delta rx movement = %d\n", report->rx);
+    printf("Delta ry movement = %d\n", report->ry);
+    printf("Delta rz movement = %d\n", report->rz);
+    printf("Hat = %02X\n", report->hat);
+    printf("Buttons = %08X\n", report->buttons);
+
+    fflush(stdout);
 
     // process_hat(report->hat);
 
