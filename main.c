@@ -29,6 +29,7 @@
 
 #include "bsp/board.h"
 #include "pico/time.h"
+#include "pico/stdio.h"
 #include "tusb.h"
 
 //--------------------------------------------------------------------+
@@ -53,8 +54,11 @@ int main(void)
         // tinyusb host task
         tuh_task();
 
-        led_blinking_task();
-        hid_app_task();
+        // led_blinking_task();
+        char in = getchar_timeout_us(10);
+        if (in == 's') {
+            hid_app_task();
+        }
     }
 
     return 0;

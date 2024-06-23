@@ -76,18 +76,18 @@ uint8_t device_instance = 0;
 
 void hid_app_task(void)
 {
-    const uint32_t interval_ms = 1000;
-    static uint32_t start_ms = 0;
-    // Blink every interval ms
-    if(board_millis() - start_ms < interval_ms)
-    {
-        return; // not enough time
-    }
-    start_ms += interval_ms;
+    // const uint32_t interval_ms = 1000;
+    // static uint32_t start_ms = 0;
+    // // Blink every interval ms
+    // if(board_millis() - start_ms < interval_ms)
+    // {
+    //     return; // not enough time
+    // }
+    // start_ms += interval_ms;
     if(is_mounted)
     {
         TU_LOG3("TU_LOG3 Send new report request.\n");
-        printf("Request report from %d %d\n", device_address, device_instance);
+        // printf("Request report from %d %d\n", device_address, device_instance);
         if(!tuh_hid_receive_report(device_address, device_instance))
         {
             printf("Error: cannot request to receive report\r\n");
@@ -157,7 +157,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
                                 uint8_t const *report, uint16_t len)
 {
-    printf("Received report from %d %d\n", dev_addr, instance);
+    // printf("Received report from %d %d\n", dev_addr, instance);
     uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
     switch(itf_protocol)
     {
@@ -352,6 +352,21 @@ static void process_gamepad_report(hid_gamepad_report_t const *report)
     // process_buttons(report->buttons);
 }
 
+static void print_report(uint8_t const *report, uint16_t len) {
+    static uint8_t buffer[40];
+    printf("New report:\n");
+    for (int i = 0; i < len; i++) {
+        if (buffer[i] != report[i]) {
+            printf("%d:%02X ", i, report[i]);
+        }
+        if (i == 20) {
+            printf("\n");
+        }
+        buffer[i] = report[i];
+    }
+    printf("\n");
+}
+
 //--------------------------------------------------------------------+
 // Generic Report
 //--------------------------------------------------------------------+
@@ -419,7 +434,8 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance,
                 break;
 
             case HID_USAGE_DESKTOP_GAMEPAD:
-                process_gamepad_report((hid_gamepad_report_t const *)report);
+                // process_gamepad_report((hid_gamepad_report_t const *)report);
+                print_report(report, len);
                 break;
 
             default:
